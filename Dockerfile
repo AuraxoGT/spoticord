@@ -1,12 +1,14 @@
-# syntax=docker/dockerfile:1.4
-ARG CACHE_NAMESPACE=spoticord
+# syntax=docker/dockerfile:1.6
 ARG RUST_VERSION=1.80.1
 ARG PG_VERSION=16.4
+ARG CACHE_NAMESPACE=spoticord
 
 # --- Build Stage ---
 FROM --platform=linux/amd64 rust:${RUST_VERSION}-slim AS builder
 ARG CACHE_NAMESPACE
 ARG PG_VERSION
+ARG RUST_VERSION
+
 WORKDIR /app
 
 # System dependencies
@@ -28,7 +30,7 @@ ENV PGVER=${PG_VERSION} \
     CARGO_HOME=/usr/local/cargo
 
 # Build PostgreSQL libpq
-RUN curl -o postgresql.tar.bz2 https://ftp.postgresql.org/pub/source/v${PGVER}/postgresql-${PGVER}.tar.bz2 \
+RUN curl -L -o postgresql.tar.bz2 https://ftp.postgresql.org/pub/source/v${PGVER}/postgresql-${PGVER}.tar.bz2 \
     && tar xjf postgresql.tar.bz2 \
     && cd postgresql-${PGVER} \
     && ./configure \
@@ -47,9 +49,9 @@ RUN rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
 # Copy source files
 COPY . .
 
-# Build with versioned cache mounts
-RUN --mount=type=cache,id=${CACHE_NAMESPACE}-cargo-registry-v${RUST_VERSION},target=/usr/local/cargo/registry \
-    --mount=type=cache,id=${CACHE_NAMESPACE}-rust-target-v${RUST_VERSION},target=/app/target \
+# Improved cache mounting with explicit prefixing
+RUN --mount=type=cache,sharing=locked,id=cache:${CACHE_NAMESPACE}-cargo-registry-v${RUST_VERSION},target=/usr/local/cargo/registry \
+    --mount=type=cache,sharing=locked,id=cache:${CACHE_NAMESPACE}-rust-target-v${RUST_VERSION},target=/app/target \
     set -eux; \
     # x86_64 build
     cargo build --release --target=x86_64-unknown-linux-gnu; \
@@ -70,6 +72,7 @@ RUN apt-get update \
         ca-certificates \
         libpq-dev \
         libssl3 \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Binary selection

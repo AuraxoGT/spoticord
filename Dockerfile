@@ -1,49 +1,62 @@
 # syntax=docker/dockerfile:1.4
-ARG RUST_VERSION=1.80.1
-
-# --- Build Stage ---
-FROM rust:${RUST_VERSION}-slim AS builder
-
-WORKDIR /app
+FROM rust:1.80.1-slim AS builder
 
 # Install system dependencies
-RUN apt-get update && apt-get install -yqq \
-    pkg-config \
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
     libssl-dev \
+    pkg-config \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy source files
+WORKDIR /app
+
+# Copy only necessary files for dependency resolution
+COPY Cargo.toml Cargo.lock ./
+
+# Create a dummy src to cache dependencies
+RUN mkdir src && \
+    echo "fn main() {}" > src/main.rs && \
+    cargo build --release && \
+    rm -rf src
+
+# Now copy the actual source code
 COPY . .
 
-# Build the application
+# Touch main.rs to force rebuild
+RUN touch src/main.rs
+
+# Build the project
 RUN cargo build --release
 
-# --- Runtime Stage ---
+# Runtime stage
 FROM debian:bookworm-slim
 
-# Runtime dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates \
-        libssl3 \
-        libpq-dev \
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libssl3 \
+    ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the built binary
-COPY --from=builder /app/target/release/spoticord /usr/local/bin/spoticord
+WORKDIR /app
 
-# Runtime configuration
-EXPOSE 8080
-
-ENV PORT=8080
+# Copy the binary from the builder stage
+COPY --from=builder /app/target/release/spoticord /app/spoticord
 
 # Make the binary executable
-RUN chmod +x /usr/local/bin/spoticord
+RUN chmod +x /app/spoticord
 
-# Default healthcheck (modify as needed)
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Use dynamic port from Railway
+ENV PORT=8080
+
+# Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT}/health || exit 1
 
-# Run the application
-CMD ["/usr/local/bin/spoticord"]
+# Run the binary
+CMD ["/app/spoticord"]

@@ -194,8 +194,8 @@ impl PlaybackEmbed {
                     CreateInteractionResponseFollowup::new()
                         .embed(
                             CreateEmbed::new()
-                                .title("Cannot perform action")
-                                .description("I'm currently not playing any music in this server"),
+                                .title("Negalima atlikti veiksmo")
+                                .description("Šiuo metu negroja jokia muzika"),
                         )
                         .ephemeral(true),
                 )
@@ -211,8 +211,8 @@ impl PlaybackEmbed {
                     CreateInteractionResponseFollowup::new()
                         .embed(
                             CreateEmbed::new()
-                                .title("Cannot perform action")
-                                .description("Only the host may use the media buttons"),
+                                .title("Negalima atlikti veiksmo")
+                                .description("Tik leidėjas tegali naudoti šiuos mygtukus"),
                         )
                         .ephemeral(true),
                 )
@@ -378,8 +378,8 @@ async fn respond_not_playing(context: &Context, interaction: CommandInteraction)
 
 fn not_playing_embed() -> CreateEmbed {
     CreateEmbed::new()
-        .title("Cannot display song details")
-        .description("I'm currently not playing any music in this server.")
+        .title("Negaliu parodyti informacijos")
+        .description("Šiuo metu negroja jokia muzika.")
         .color(Colors::Error)
 }
 
@@ -440,7 +440,7 @@ fn build_embed(playback_info: &PlaybackInfo, owner: &User) -> CreateEmbed {
 
     CreateEmbed::new()
         .author(
-            CreateEmbedAuthor::new("Currently Playing")
+            CreateEmbedAuthor::new("Dabar groja")
                 .icon_url("https://spoticord.com/spotify-logo.png"),
         )
         .description(description)

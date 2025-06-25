@@ -48,8 +48,8 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
             CreateReply::default()
                 .embed(
                     CreateEmbed::new()
-                        .title("Cannot join voice channel")
-                        .description("You need to connect to a voice channel before running /join")
+                        .title("Negaliu prisijungti prie kanalo")
+                        .description("Turite būti kanale prieš naudojant /join")
                         .color(Colors::Error),
                 )
                 .ephemeral(true),
@@ -64,10 +64,9 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
             CreateReply::default()
                 .embed(
                     CreateEmbed::new()
-                        .title("Cannot join voice channel")
+                        .title("Negaliu prisijungti prie kanalo")
                         .description(
-                            "The voice channel you are in is not available.
-                                    I might not have the permissions to see this channel.",
+                            "Kanalas nepasiekiamas.",
                         )
                         .color(Colors::Error),
                 )
@@ -106,9 +105,9 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
             CreateReply::default()
                 .embed(
                     CreateEmbed::new()
-                        .title("No Spotify account")
+                        .title("Nėra Spotify paskyros")
                         .description(
-                            "You need to link your Spotify account to Spoticord before being able to use it.\nUse the `/link` command to link your account.",
+                            "Panaudokite /link komandą kad prijungtumėte savo Spotify paskyrą.",
                         )
                         .color(Colors::Error),
                 )
@@ -128,8 +127,8 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
                 CreateReply::default()
                     .embed(
                         CreateEmbed::new()
-                            .title("Spoticord is busy")
-                            .description("Spoticord is already being used in this server.")
+                            .title("Botas užsiėmes")
+                            .description("Botas jau yra naudojamas.")
                             .color(Colors::Error),
                     )
                     .ephemeral(true),
@@ -148,10 +147,10 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
             CreateReply::default()
                 .embed(
                     CreateEmbed::new()
-                        .title("You are already using Spoticord")
+                        .title("Jau naudoji botą")
                         .description(format!(
-                            "You are already using Spoticord in `{}`\n\n\
-                            Stop playing in that server first before starting a new session.",
+                            "Tu jau naudoji botą serveryje `{}`\n\n\
+                            Sustabdyk pirminę sesija prieš pradėdamas nauja.",
                             spoticord_utils::discord::escape(server_name)
                         ))
                         .color(Colors::Error),
@@ -232,12 +231,12 @@ pub async fn join(ctx: Context<'_>) -> Result<()> {
         CreateReply::default().embed(
             CreateEmbed::new()
                 .author(
-                    CreateEmbedAuthor::new("Connected to voice channel")
+                    CreateEmbedAuthor::new("Prisijungta į kanalą")
                         .icon_url("https://spoticord.com/speaker.png"),
                 )
-                .description(format!("Come listen along in <#{}>", channel))
+                .description(format!("Muzika paleista <#{}>", channel))
                 .footer(CreateEmbedFooter::new(
-                    "You must manually select your device in Spotify",
+                    "Kontroliuokite muziką per savo Spotify programą",
                 ))
                 .color(Colors::Info),
         ),
